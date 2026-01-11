@@ -9,12 +9,7 @@ Features:
 """
 
 import streamlit as st
-import sys
-from pathlib import Path
-import json
 
-# Add parent directory to path to import utils
-sys.path.insert(0, str(Path(__file__).parent.parent))
 from utils import get_docker_client, get_containers, get_container_image_name
 
 # Initialize Docker client
