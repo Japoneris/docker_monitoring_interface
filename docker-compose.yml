@@ -1,0 +1,11 @@
+services:
+  docker-monitoring-lab:
+    build: .
+    ports:
+      - "8505:8501"
+    volumes: # Neceassary to access docker container OUSTIDE the container itself
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    restart: unless-stopped
