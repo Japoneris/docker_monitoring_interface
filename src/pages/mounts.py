@@ -12,25 +12,17 @@ Features:
 """
 
 import streamlit as st
-import docker
-from datetime import datetime
 import os
 
+from utils import get_docker_client, get_containers
+
 # Initialize Docker client
-try:
-    client = docker.from_env()
-except Exception as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 st.title("🔗 Docker Mounts & Binds Manager")
 
 # Get all containers
-try:
-    all_containers = client.containers.list(all=True)
-except Exception as e:
-    st.error(f"Failed to list containers: {e}")
-    st.stop()
+all_containers = get_containers(client, all_containers=True)
 
 # Collect all mounts from all containers
 all_mounts = []

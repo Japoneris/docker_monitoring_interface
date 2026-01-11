@@ -1,14 +1,21 @@
 # Docker Monitoring Lab
 
-Manage your docker in a nice streamlit interface.
 
-## Goal
+## What 
 
-We do not know by heart all the docker commands.
+Graphical interface to interact with docker containers.
 
-Here, interact with them in a GUI.
+## Why
 
+I do not know by heart all docker commands. 
+This makes my life easier.
 
+## How 
+
+Python with:
+
+- `streamlit` to configure easily a GUI
+- `docker` [SDK](https://docker-py.readthedocs.io/en/stable/) to interact with docker
 
 # Running
 

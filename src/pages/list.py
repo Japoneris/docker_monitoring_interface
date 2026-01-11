@@ -16,24 +16,20 @@ Some info are only avaialable on demand (add a button to fetch more details)
 """
 
 import streamlit as st
-import docker
-from datetime import datetime
+import sys
+from pathlib import Path
+
+# Add parent directory to path to import utils
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils import get_docker_client, get_containers, get_container_image_name, get_container_ports_display
 
 # Initialize Docker client
-try:
-    client = docker.from_env()
-except Exception as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 st.title("🐳 Docker Container Manager")
 
 # Get all containers
-try:
-    all_containers = client.containers.list(all=True)
-except Exception as e:
-    st.error(f"Failed to list containers: {e}")
-    st.stop()
+all_containers = get_containers(client, all_containers=True)
 
 # Separate running and stopped containers
 running_containers = [c for c in all_containers if c.status == 'running']
@@ -49,20 +45,12 @@ if running_containers:
             with col1:
                 st.write(f"**ID:** `{container.short_id}`")
                 st.write(f"**Name:** {container.name}")
-                st.write(f"**Image:** {container.image.tags[0] if container.image.tags else container.image.short_id}")
+                st.write(f"**Image:** {get_container_image_name(container)}")
                 st.write(f"**Status:** {container.status}")
                 
                 # Ports
-                ports = container.attrs.get('NetworkSettings', {}).get('Ports', {})
-                if ports:
-                    port_mapping = []
-                    for container_port, host_bindings in ports.items():
-                        if host_bindings:
-                            for binding in host_bindings:
-                                port_mapping.append(f"{binding['HostIp']}:{binding['HostPort']} -> {container_port}")
-                        else:
-                            port_mapping.append(f"{container_port} (not published)")
-                    st.write(f"**Ports:** {', '.join(port_mapping)}")
+                ports_display = get_container_ports_display(container)
+                st.write(f"**Ports:** {ports_display}")
                 
                 # Show details button
                 if st.button(f"📋 Show More Details", key=f"details_{container.id}"):
@@ -102,7 +90,7 @@ if stopped_containers:
             with col1:
                 st.write(f"**ID:** `{container.short_id}`")
                 st.write(f"**Name:** {container.name}")
-                st.write(f"**Image:** {container.image.tags[0] if container.image.tags else container.image.short_id}")
+                st.write(f"**Image:** {get_container_image_name(container)}")
                 st.write(f"**Status:** {container.status}")
                 
                 # Show details button

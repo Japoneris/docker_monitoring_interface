@@ -12,51 +12,23 @@ Features:
 """
 
 import streamlit as st
-import docker
 from datetime import datetime
 
+from utils import get_docker_client, get_containers, get_volumes, build_resource_usage_map
+
 # Initialize Docker client
-try:
-    client = docker.from_env()
-except Exception as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 st.title("💾 Docker Volume Manager")
 
-
 # Get all volumes
-try:
-    volumes = client.volumes.list()
-except Exception as e:
-    st.error(f"Failed to list volumes: {e}")
-    st.stop()
+volumes = get_volumes(client)
 
 # Get all containers to check volume usage
-try:
-    all_containers = client.containers.list(all=True)
-except Exception as e:
-    st.error(f"Failed to list containers: {e}")
-    all_containers = []
+all_containers = get_containers(client, all_containers=True)
 
 # Build a map of volumes to containers
-volume_usage = {}
-for container in all_containers:
-    mounts = container.attrs.get('Mounts', [])
-    for mount in mounts:
-        if mount.get('Type') == 'volume':
-            volume_name = mount.get('Name')
-            if volume_name:
-                if volume_name not in volume_usage:
-                    volume_usage[volume_name] = []
-                volume_usage[volume_name].append({
-                    'name': container.name,
-                    'id': container.short_id,
-                    'status': container.status,
-                    'destination': mount.get('Destination', 'N/A')
-                })
-
-
+volume_usage = build_resource_usage_map(all_containers, resource_type='volume')
 
 # Information section
 with st.expander("ℹ️ About Docker Volumes"):

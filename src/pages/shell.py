@@ -11,8 +11,9 @@ In the info, say that "cd" command may not work as expected, so use the path fie
 """
 
 import streamlit as st
-import docker
 from docker.errors import DockerException, APIError
+
+from utils import get_docker_client, create_container_selector
 
 st.title("🐳 Docker Container Shell")
 
@@ -20,31 +21,23 @@ st.info("ℹ️ **Note:** The `cd` command may not work as expected in this inte
         "Please use the **Working Directory** field below to navigate to different paths.")
 
 # Get Docker client
-try:
-    client = docker.from_env()
-except DockerException as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 # Get running containers
 try:
     containers = client.containers.list()
-    if not containers:
-        st.warning("No running containers found. Please start a container first.")
-        st.stop()
-    
-    container_dict = {f"{c.name} ({c.short_id})": c for c in containers}
 except APIError as e:
     st.error(f"Error fetching containers: {e}")
     st.stop()
 
 # Container selection
 st.subheader("Container Selection")
-selected_container_name = st.selectbox(
-    "Select a container:",
-    options=list(container_dict.keys())
+selected_container = create_container_selector(
+    containers,
+    label="Select a container:",
+    show_status=False,
+    show_emoji=False
 )
-selected_container = container_dict[selected_container_name]
 
 # Working directory input
 st.subheader("Working Directory")

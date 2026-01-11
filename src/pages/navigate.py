@@ -12,31 +12,20 @@ Provide also a way to delete files/folders (one by one, asking for confirmation)
 """
 
 import streamlit as st
-import docker
 import tarfile
 import io
 import os
 from datetime import datetime
 
+from utils import get_docker_client, get_containers
+
 # Initialize Docker client
-try:
-    client = docker.from_env()
-except Exception as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 st.title("📁 Container File Navigator")
 
 # Get all running containers
-try:
-    running_containers = client.containers.list()
-except Exception as e:
-    st.error(f"Failed to list containers: {e}")
-    st.stop()
-
-if not running_containers:
-    st.warning("No running containers found. Please start a container first.")
-    st.stop()
+running_containers = get_containers(client, all_containers=False)
 
 # Container selection
 container_options = {f"{c.name} ({c.short_id})": c for c in running_containers}
@@ -347,5 +336,4 @@ else:
                 st.rerun()
             except Exception as e:
                 st.error(f"Error uploading file: {e}")
-    
     

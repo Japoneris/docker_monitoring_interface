@@ -13,47 +13,25 @@ Features:
 """
 
 import streamlit as st
-import docker
 from datetime import datetime
+import docker
+
+# Add parent directory to path to import utils
+from utils import get_docker_client, get_containers, get_networks, build_resource_usage_map
 
 # Initialize Docker client
-try:
-    client = docker.from_env()
-except Exception as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 st.title("🌐 Docker Network Manager")
 
-
 # Get all networks
-try:
-    networks = client.networks.list()
-except Exception as e:
-    st.error(f"Failed to list networks: {e}")
-    st.stop()
+networks = get_networks(client)
 
 # Get all containers to check network connections
-try:
-    all_containers = client.containers.list(all=True)
-except Exception as e:
-    st.error(f"Failed to list containers: {e}")
-    all_containers = []
+all_containers = get_containers(client, all_containers=True)
 
 # Build a map of networks to containers
-network_usage = {}
-for container in all_containers:
-    container_networks = container.attrs.get('NetworkSettings', {}).get('Networks', {})
-    for network_name, network_info in container_networks.items():
-        if network_name not in network_usage:
-            network_usage[network_name] = []
-        network_usage[network_name].append({
-            'name': container.name,
-            'id': container.short_id,
-            'status': container.status,
-            'ipv4_address': network_info.get('IPAddress', 'N/A'),
-            'ipv6_address': network_info.get('GlobalIPv6Address', 'N/A')
-        })
+network_usage = build_resource_usage_map(all_containers, resource_type='network')
 
 
 # Information section

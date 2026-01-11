@@ -9,28 +9,21 @@ Features:
 """
 
 import streamlit as st
-import docker
+import sys
+from pathlib import Path
 import json
 
+# Add parent directory to path to import utils
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from utils import get_docker_client, get_containers, get_container_image_name
+
 # Initialize Docker client
-try:
-    client = docker.from_env()
-except Exception as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 st.title("⚙️ Docker Container Configuration Editor")
 
 # Get all containers
-try:
-    all_containers = client.containers.list(all=True)
-except Exception as e:
-    st.error(f"Failed to list containers: {e}")
-    st.stop()
-
-if not all_containers:
-    st.warning("No containers found. Please create a container first.")
-    st.stop()
+all_containers = get_containers(client, all_containers=True)
 
 # Container selection
 container_options = {f"{c.name} ({c.short_id}) - {c.status}": c for c in all_containers}
@@ -47,7 +40,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.metric("Status", container.status)
 with col2:
-    st.metric("Image", container.image.tags[0] if container.image.tags else container.image.short_id)
+    st.metric("Image", get_container_image_name(container))
 with col3:
     st.metric("ID", container.short_id)
 

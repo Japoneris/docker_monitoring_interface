@@ -11,18 +11,15 @@ Features:
 """
 
 import streamlit as st
-import docker
 from datetime import datetime, timedelta
 from docker.errors import DockerException, APIError
+
+from utils import get_docker_client, create_container_selector
 
 st.title("📜 Docker Container Logs")
 
 # Get Docker client
-try:
-    client = docker.from_env()
-except DockerException as e:
-    st.error(f"Failed to connect to Docker: {e}")
-    st.stop()
+client = get_docker_client()
 
 # Initialize session state for pagination
 if 'log_offset' not in st.session_state:
@@ -31,38 +28,23 @@ if 'logs_per_page' not in st.session_state:
     st.session_state.logs_per_page = 100
 
 # Get containers
-try:
-    show_all = st.checkbox("Show all containers (including stopped)", value=False)
-    containers = client.containers.list(all=show_all)
-    
-    if not containers:
-        st.warning("No containers found." + (" Please start a container first." if not show_all else ""))
-        st.stop()
-    
-    # Add status emojis
-    status_emojis = {
-        'running': '🟢',
-        'exited': '🔴',
-        'paused': '⏸️',
-        'restarting': '🔄',
-        'created': '🔵',
-        'dead': '💀',
-        'removing': '🗑️'
-    }
+show_all = st.checkbox("Show all containers (including stopped)", value=False)
 
-    container_dict = {f"{status_emojis.get(c.status, '⚪')} [{c.status}] {c.name} ({c.short_id}) ": c for c in containers}
+try:
+    containers = client.containers.list(all=show_all)
 except APIError as e:
     st.error(f"Error fetching containers: {e}")
     st.stop()
 
 # Container selection
 st.subheader("Container Selection")
-selected_container_name = st.selectbox(
-    "Select a container:",
-    options=list(container_dict.keys()),
-    help="Choose the container whose logs you want to view"
+selected_container = create_container_selector(
+    containers,
+    label="Select a container:",
+    show_status=True,
+    show_emoji=True,
+    help_text="Choose the container whose logs you want to view"
 )
-selected_container = container_dict[selected_container_name]
 
 # Log configuration
 st.subheader("Log Options")
