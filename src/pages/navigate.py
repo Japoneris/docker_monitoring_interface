@@ -348,7 +348,4 @@ else:
             except Exception as e:
                 st.error(f"Error uploading file: {e}")
     
-    # Refresh button
-    st.divider()
-    if st.button("🔄 Refresh"):
-        st.rerun()
+    

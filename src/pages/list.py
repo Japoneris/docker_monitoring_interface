@@ -146,6 +146,3 @@ if stopped_containers:
 else:
     st.info("No stopped containers found")
 
-# Refresh button
-if st.button("🔄 Refresh List"):
-    st.rerun()

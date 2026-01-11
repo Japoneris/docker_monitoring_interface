@@ -5,6 +5,11 @@ import streamlit as st
 # Load pages #
 ##############
 
+
+with st.sidebar:
+    if st.button("🔄 Refresh page", use_container_width=True):
+        st.rerun()
+
 pages = [
     st.Page("pages/list.py", title="List existing containers", icon=":material/folder:", url_path="list"),
     st.Page("pages/config.py", title="Edit container configuration", icon=":material/settings:", url_path="config"),

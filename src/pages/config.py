@@ -334,7 +334,7 @@ st.divider()
 
 # Container control buttons
 st.subheader("Container Controls")
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     if is_running:
@@ -363,11 +363,8 @@ with col2:
         except Exception as e:
             st.error(f"Failed to restart container: {e}")
 
-with col3:
-    if st.button("🔄 Refresh Data", key="refresh_data"):
-        st.rerun()
 
-with col4:
+with col3:
     if not is_running:
         if st.button("🗑️ Remove Container", type="secondary", key="remove_container"):
             if "confirm_remove_config" not in st.session_state:

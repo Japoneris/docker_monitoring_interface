@@ -129,11 +129,8 @@ with col_opt2:
 st.subheader("Logs")
 
 # Action buttons
-col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 2])
+col_btn1, col_btn2 = st.columns([1, 2])
 with col_btn1:
-    if st.button("🔄 Refresh Logs", type="primary"):
-        st.rerun()
-with col_btn2:
     if st.button("🗑️ Clear Display"):
         st.session_state.log_offset = 0
         st.rerun()

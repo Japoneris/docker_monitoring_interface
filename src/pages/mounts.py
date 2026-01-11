@@ -25,12 +25,6 @@ except Exception as e:
 
 st.title("🔗 Docker Mounts & Binds Manager")
 
-# Refresh button at the top
-col1, col2 = st.columns([4, 1])
-with col2:
-    if st.button("🔄 Refresh", use_container_width=True):
-        st.rerun()
-
 # Get all containers
 try:
     all_containers = client.containers.list(all=True)
